@@ -45,6 +45,21 @@ type AnalysisResponse = {
 };
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+const PLAN_LABELS: Record<string, string> = {
+  pay_per_ride: "Single Ride ($3.25)",
+  "10-trip": "10-Trip ($31.00)",
+  "20-trip": "20-Trip ($62.00)",
+  "40-trip": "40-Trip ($124.00)",
+  unlimited_1_day_pass_all_active_days: "Unlimited 1-Day Pass ($12.50/day used)",
+  unlimited_7_day_pass_all_active_weeks: "Unlimited 7-Day Pass ($42.75/week used)",
+  unlimited_30_day_pass: "Unlimited 30-Day Pass ($131.50)",
+  unlimited_30_day_pass_all_active_months: "Unlimited 30-Day Pass (all active months)",
+  unlimited_30_day_pass_or_best_monthly_alternative:
+    "Unlimited 30-Day Pass or best monthly alternative",
+};
+
+const formatPlanName = (planKey: string) =>
+  PLAN_LABELS[planKey] ?? planKey.replaceAll("_", " ");
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -56,6 +71,7 @@ export default function Home() {
     if (!data) return [];
     return Object.entries(data.recommendation.overall.options).map(([plan, cost]) => ({
       plan,
+      planLabel: formatPlanName(plan),
       cost,
       isBest: plan === data.recommendation.overall.best_option,
     }));
@@ -192,7 +208,7 @@ export default function Home() {
           <section className={styles.card}>
             <h3>Recommendation</h3>
             <p>
-              <strong>Best plan:</strong> {data.recommendation.overall.best_option}
+              <strong>Best plan:</strong> {formatPlanName(data.recommendation.overall.best_option)}
             </p>
             <p>{data.recommendation.overall.reasoning}</p>
             <p>
@@ -210,7 +226,7 @@ export default function Home() {
               <tbody>
                 {recommendationRows.map((row) => (
                   <tr key={row.plan}>
-                    <td>{row.plan}</td>
+                    <td>{row.planLabel}</td>
                     <td>${row.cost.toFixed(2)}</td>
                     <td>{row.isBest ? "Yes" : ""}</td>
                   </tr>
