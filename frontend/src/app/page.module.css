@@ -6,12 +6,23 @@
   gap: 1rem;
 }
 
+.main h1 {
+  color: var(--foreground);
+  letter-spacing: 0.5px;
+}
+
+.main > p {
+  color: #c9d3e0;
+}
+
 .uploadCard,
 .card {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  background: #fff;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  background: var(--surface);
+  color: var(--surface-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .uploadCard {
@@ -19,20 +30,61 @@
   gap: 0.75rem;
   align-items: center;
   flex-wrap: wrap;
+  border-top: 4px solid var(--path-blue);
+}
+
+.uploadCard label {
+  color: var(--surface-text);
+  font-weight: 600;
+}
+
+.uploadCard p {
+  color: var(--surface-muted);
+  font-size: 0.85rem;
+}
+
+.uploadCard code {
+  background: #eef2f7;
+  color: var(--surface-text);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
+.uploadCard input[type="file"] {
+  color: var(--surface-text);
+}
+
+.uploadCard input[type="number"] {
+  color: var(--surface-text);
+  background: #fff;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
 }
 
 .uploadCard button {
   border: 0;
   border-radius: 6px;
-  background: #111827;
+  background: var(--path-blue);
   color: #fff;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+
+.uploadCard button:hover:not(:disabled) {
+  background: var(--path-blue-dark);
 }
 
 .uploadCard button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.card h2,
+.card h3 {
+  color: var(--path-blue-dark);
 }
 
 .summaryGrid {
@@ -49,6 +101,7 @@
 
 .error {
   color: #dc2626;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -56,11 +109,22 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.5rem;
+  color: var(--surface-text);
 }
 
-.table th,
+.table th {
+  text-align: left;
+  border-bottom: 2px solid var(--path-blue);
+  padding: 0.5rem;
+  color: var(--path-blue-dark);
+}
+
 .table td {
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--surface-border);
   padding: 0.5rem;
+}
+
+.table tr:hover td {
+  background: #f5f8fd;
 }
