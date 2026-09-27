@@ -2,27 +2,42 @@ from pathlib import Path
 
 from app.analysis import analyze_rides
 from app.parser import parse_rides_csv
+from app.pricing import build_recommendation
 
 
-SAMPLE_FILE = Path(__file__).resolve().parents[1] / "sample_data" / "sample_rides.csv"
+SAMPLE_FILE = Path(__file__).resolve().parent / "fixtures" / "trip_history_sample.csv"
 
 
-def test_recommendation_has_expected_shape() -> None:
+def test_analysis_summarizes_stored_value_and_pass_rides() -> None:
     parsed = parse_rides_csv(SAMPLE_FILE.read_bytes())
     analysis = analyze_rides(parsed.dataframe)
 
-    overall = analysis["recommendation"]["overall"]
-    assert "best_option" in overall
-    assert "pay_per_ride" in overall["options"]
-    assert "10-trip" in overall["options"]
-    assert "20-trip" in overall["options"]
-    assert "40-trip" in overall["options"]
-    assert "unlimited_1_day_pass_all_active_days" in overall["options"]
-    assert "unlimited_7_day_pass_all_active_weeks" in overall["options"]
-    assert "unlimited_30_day_pass_all_active_months" in overall["options"]
-    assert "unlimited_30_day_pass_or_best_monthly_alternative" in overall["options"]
-    assert analysis["summary"]["total_rides"] == 88
-    assert len(analysis["recommendation"]["per_month"]) == 12
-    assert overall["best_option"] == "10-trip"
-    assert overall["options"]["pay_per_ride"] == 286.0
-    assert overall["options"]["10-trip"] == 279.0
+    assert analysis["summary"]["total_rides"] == 8
+    assert analysis["summary"]["total_spent"] == 13.0
+    assert analysis["summary"]["average_stored_value_fare"] == 3.25
+    assert analysis["summary"]["stored_value_ride_count"] == 4
+    assert analysis["summary"]["pass_ride_count"] == 4
+    assert analysis["rides_by_location"][0] == {"location": "Grove Street", "rides": 2}
+    product_breakdown = {
+        entry["product_type"]: entry for entry in analysis["product_type_breakdown"]
+    }
+    assert product_breakdown["Stored Value"]["rides"] == 4
+    assert product_breakdown["40-Trip"]["rides"] == 3
+    assert product_breakdown["20-Trip"]["effective_cost_per_ride"] == 3.1
+    assert analysis["trip_history"][0]["reference"] == "104390291"
+    assert analysis["trip_history"][1]["fare_amount"] is None
+
+
+def test_recommendation_allows_pack_price_overrides() -> None:
+    parsed = parse_rides_csv(SAMPLE_FILE.read_bytes())
+
+    recommendation = build_recommendation(
+        parsed.dataframe,
+        pack_price_overrides={"10-trip": 30.0, "20-trip": 70.0, "40-trip": 120.0},
+    )
+
+    overall = recommendation["overall"]
+    assert overall["best_option"] == "pay_per_ride"
+    assert overall["options"]["10-trip"] == 30.0
+    assert overall["options"]["20-trip"] == 70.0
+    assert overall["options"]["40-trip"] == 120.0

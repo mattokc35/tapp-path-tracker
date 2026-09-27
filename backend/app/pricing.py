@@ -5,7 +5,6 @@ from math import ceil
 
 import pandas as pd
 
-# Placeholder pricing constants. Verify and update these with current NJ Transit PATH fares.
 SINGLE_RIDE_FARE = 3.25
 UNLIMITED_1_DAY_PASS_PRICE = 12.50
 UNLIMITED_7_DAY_PASS_PRICE = 42.75
@@ -23,6 +22,18 @@ class CostOption:
     cost: float
 
 
+def _pack_options(pack_price_overrides: dict[str, float] | None = None) -> list[dict[str, float | str]]:
+    overrides = pack_price_overrides or {}
+    return [
+        {
+            "name": str(pack["name"]),
+            "rides": int(pack["rides"]),
+            "price": float(overrides.get(str(pack["name"]), pack["price"])),
+        }
+        for pack in PACK_OPTIONS
+    ]
+
+
 def _pack_cost(rides: int, pack_rides: int, pack_price: float) -> float:
     return ceil(rides / pack_rides) * pack_price if rides > 0 else 0.0
 
@@ -35,13 +46,29 @@ def _pick_best(options: list[CostOption]) -> tuple[CostOption, float]:
     return best, savings
 
 
-def _month_recommendation(month: str, month_df: pd.DataFrame) -> dict:
+def effective_cost_per_ride(
+    product_type: str, pack_price_overrides: dict[str, float] | None = None
+) -> float | None:
+    normalized = str(product_type).strip()
+    if normalized.casefold() == "stored value":
+        return SINGLE_RIDE_FARE
+
+    for pack in _pack_options(pack_price_overrides):
+        if normalized.casefold() == str(pack["name"]).casefold():
+            return round(float(pack["price"]) / int(pack["rides"]), 2)
+
+    return None
+
+
+def _month_recommendation(
+    month: str, month_df: pd.DataFrame, pack_price_overrides: dict[str, float] | None = None
+) -> dict:
     rides = int(len(month_df))
     active_days = int(month_df["ride_date"].dt.date.nunique())
     active_weeks = int(month_df["ride_date"].dt.to_period("W").nunique())
 
     options = [CostOption("pay_per_ride", rides * SINGLE_RIDE_FARE)]
-    for pack in PACK_OPTIONS:
+    for pack in _pack_options(pack_price_overrides):
         options.append(CostOption(pack["name"], _pack_cost(rides, pack["rides"], pack["price"])))
     options.append(
         CostOption(
@@ -72,7 +99,9 @@ def _month_recommendation(month: str, month_df: pd.DataFrame) -> dict:
     }
 
 
-def build_recommendation(df: pd.DataFrame) -> dict:
+def build_recommendation(
+    df: pd.DataFrame, pack_price_overrides: dict[str, float] | None = None
+) -> dict:
     rides = len(df)
     month_counts = (
         df.groupby(df["ride_date"].dt.to_period("M")).size().sort_index().rename("rides").astype(int)
@@ -80,11 +109,13 @@ def build_recommendation(df: pd.DataFrame) -> dict:
     active_months = int((month_counts > 0).sum())
     active_days = int(df["ride_date"].dt.date.nunique())
     active_weeks = int(df["ride_date"].dt.to_period("W").nunique())
+    stored_value_rides = int(df["fare_amount"].notna().sum())
+    pass_rides = rides - stored_value_rides
 
     pay_per_ride = rides * SINGLE_RIDE_FARE
 
     options = [CostOption("pay_per_ride", pay_per_ride)]
-    for pack in PACK_OPTIONS:
+    for pack in _pack_options(pack_price_overrides):
         options.append(CostOption(pack["name"], _pack_cost(rides, pack["rides"], pack["price"])))
     options.append(
         CostOption(
@@ -106,7 +137,7 @@ def build_recommendation(df: pd.DataFrame) -> dict:
         month_active_days = int(month_df["ride_date"].dt.date.nunique())
         month_active_weeks = int(month_df["ride_date"].dt.to_period("W").nunique())
         non_pass_options = [month_rides * SINGLE_RIDE_FARE]
-        for pack in PACK_OPTIONS:
+        for pack in _pack_options(pack_price_overrides):
             non_pass_options.append(_pack_cost(month_rides, pack["rides"], pack["price"]))
         non_pass_options.append(month_active_days * UNLIMITED_1_DAY_PASS_PRICE)
         non_pass_options.append(month_active_weeks * UNLIMITED_7_DAY_PASS_PRICE)
@@ -127,12 +158,17 @@ def build_recommendation(df: pd.DataFrame) -> dict:
 
     avg_rides_per_month = float(month_counts.mean()) if not month_counts.empty else 0.0
     reasoning = (
-        f"You averaged {avg_rides_per_month:.1f} rides/month. "
-        f"{best.name} is estimated to save ${savings:.2f} versus the next best option."
+        f"You averaged {avg_rides_per_month:.1f} rides/month across {stored_value_rides} stored-value rides "
+        f"and {pass_rides} pass-based rides. {best.name} is estimated to save ${savings:.2f} "
+        "versus the next best option."
     )
 
     per_month = [
-        _month_recommendation(str(month), df[df["ride_date"].dt.to_period("M") == month])
+        _month_recommendation(
+            str(month),
+            df[df["ride_date"].dt.to_period("M") == month],
+            pack_price_overrides=pack_price_overrides,
+        )
         for month in month_counts.index
     ]
 
