@@ -1,13 +1,18 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --background: #0b1220;
+  --foreground: #eef2f7;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* PATH brand-inspired palette */
+  --path-blue: #003da5;
+  --path-blue-dark: #002a73;
+  --path-blue-light: #4d7ed1;
+  --path-orange: #ff6a13;
+  --path-navy: #0b1220;
+
+  --surface: #ffffff;
+  --surface-text: #101828;
+  --surface-muted: #475467;
+  --surface-border: #d0d5dd;
 }
 
 html {
@@ -25,7 +30,7 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--foreground);
-  background: var(--background);
+  background: linear-gradient(180deg, var(--path-navy) 0%, var(--path-blue-dark) 100%);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -42,8 +47,6 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+html {
+  color-scheme: dark;
 }
