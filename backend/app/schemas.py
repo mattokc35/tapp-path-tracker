@@ -11,7 +11,9 @@ class DateRange(BaseModel):
 class SummaryStats(BaseModel):
     total_rides: int
     total_spent: float
-    average_fare: float
+    average_stored_value_fare: float
+    stored_value_ride_count: int
+    pass_ride_count: int
     date_range: DateRange
 
 
@@ -30,10 +32,26 @@ class DayOfWeekPoint(BaseModel):
     rides: int
 
 
-class RoutePoint(BaseModel):
-    origin: str
-    destination: str
+class LocationPoint(BaseModel):
+    location: str
     rides: int
+
+
+class ProductTypeBreakdownPoint(BaseModel):
+    product_type: str
+    rides: int
+    total_spend: float
+    effective_cost_per_ride: float | None
+
+
+class TripRecord(BaseModel):
+    reference: str
+    transit_account_number: str
+    trip_time: str
+    mode: str
+    location: str
+    product_type: str
+    fare_amount: float | None
 
 
 class MonthRecommendation(BaseModel):
@@ -61,6 +79,8 @@ class AnalysisResponse(BaseModel):
     rides_per_month: list[MonthlyRidesPoint]
     spend_per_month: list[MonthlySpendPoint]
     rides_by_day_of_week: list[DayOfWeekPoint]
-    top_routes: list[RoutePoint]
+    rides_by_location: list[LocationPoint]
+    product_type_breakdown: list[ProductTypeBreakdownPoint]
+    trip_history: list[TripRecord]
     recommendation: Recommendation
     detected_columns: dict[str, str]

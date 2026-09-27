@@ -1,6 +1,6 @@
 # tapp-path-tracker
 
-A personal web app for analyzing a 12-month NJ Transit PATH (TAPP) ride CSV export, visualizing usage/spend trends, and recommending the most cost-effective fare plan.
+A personal web app for analyzing an NJ Transit PATH (TAPP) ride CSV export, visualizing usage/spend trends, and recommending the most cost-effective fare plan.
 
 ## Stack
 
@@ -46,14 +46,32 @@ A demo CSV is included at:
 
 Use it to test the end-to-end flow without real rider data.
 
+## Expected CSV Format
+
+The backend now expects the real TAPP `trip_history.csv` export schema:
+
+```csv
+Reference,Transit Account #,Trip time,Mode,Location,Product Type,Fare Amount ($)
+104390291,"=""100060443445""",2026-09-13 10:26 AM,Rail,Grove Street,Stored Value,$3.25
+103913748,"=""100060443445""",2026-09-10 4:52 PM,Rail,Grove Street,40-Trip,-
+```
+
+Notes:
+
+- `Transit Account #` is exported as an Excel-style forced-text formula such as `="100060443445"` and is cleaned automatically to `100060443445`.
+- `Trip time` is parsed from the single timestamp column using the export format `YYYY-MM-DD h:mm AM/PM`.
+- `Fare Amount ($)` values like `$3.25` are parsed as spend, while `-` is treated as a pass-based ride with no incremental charge.
+- The export contains a single `Location` field per tap, not separate origin/destination columns.
+
 ## Current Scope (v1)
 
-- CSV upload and defensive column detection
-- Summary metrics (rides, spend, average fare, date range)
+- CSV upload and validation for the TAPP trip-history export
+- Summary metrics (rides, stored-value spend, stored-value average fare, pass/stored-value ride counts, date range)
 - Monthly rides/spend charts
 - Day-of-week usage chart
-- Top routes table (if origin/destination columns exist)
-- Overall and per-month fare-plan recommendation logic
+- Location usage and product-type breakdowns
+- Trip history table with the exported columns
+- Overall and per-month fare-plan recommendation logic, including optional pack-price overrides
 
 ## Planned Future Features (not in this PR)
 
