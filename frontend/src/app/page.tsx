@@ -409,8 +409,8 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {data.trip_history.map((trip) => (
-                  <tr key={trip.reference}>
+                {data.trip_history.map((trip, index) => (
+                  <tr key={`${trip.reference}-${trip.tripTime}-${index}`}>
                     <td>{trip.reference}</td>
                     <td>{trip.transitAccountNumber}</td>
                     <td>{formatTripTime(trip.tripTime)}</td>

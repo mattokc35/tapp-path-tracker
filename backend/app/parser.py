@@ -33,11 +33,17 @@ def _normalize(text: str) -> str:
 
 
 def _detect_column(columns: list[str], aliases: list[str]) -> str | None:
-    normalized_map = {_normalize(col): col for col in columns}
+    normalized_map = {col: _normalize(col) for col in columns}
     for alias in aliases:
-        detected = normalized_map.get(_normalize(alias))
-        if detected:
-            return detected
+        normalized_alias = _normalize(alias)
+        for original, normalized in normalized_map.items():
+            if normalized == normalized_alias:
+                return original
+    for alias in aliases:
+        normalized_alias = _normalize(alias)
+        for original, normalized in normalized_map.items():
+            if normalized_alias in normalized:
+                return original
     return None
 
 
