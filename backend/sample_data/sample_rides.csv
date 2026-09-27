@@ -1,0 +1,89 @@
+Date,Time,Origin Station,Destination Station,Fare Amount,Ride Type
+2025-01-03,07:45,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-01-03,18:10,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-01-07,07:52,Journal Square,World Trade Center,$2.75,Pay Per Ride
+2025-01-07,18:05,World Trade Center,Journal Square,$2.75,Pay Per Ride
+2025-01-12,10:20,Hoboken,Christopher St,$2.75,Pay Per Ride
+2025-01-19,11:05,Christopher St,Hoboken,$2.75,Pay Per Ride
+2025-02-04,07:49,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-02-04,18:07,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-02-08,09:30,Hoboken,World Trade Center,$2.75,Pay Per Ride
+2025-02-14,17:50,World Trade Center,Hoboken,$2.75,Pay Per Ride
+2025-02-18,07:44,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-02-18,18:15,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-03-02,08:10,Harrison,World Trade Center,$2.75,Pay Per Ride
+2025-03-02,17:45,World Trade Center,Harrison,$2.75,Pay Per Ride
+2025-03-06,07:40,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-03-06,18:12,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-03-13,07:43,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-03-13,18:17,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-03-20,08:02,Hoboken,Christopher St,$2.75,Pay Per Ride
+2025-03-20,17:58,Christopher St,Hoboken,$2.75,Pay Per Ride
+2025-04-01,07:39,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-04-01,18:09,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-04-05,11:20,Hoboken,World Trade Center,$2.75,Pay Per Ride
+2025-04-12,11:35,World Trade Center,Hoboken,$2.75,Pay Per Ride
+2025-04-15,07:48,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-04-15,18:11,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-04-22,07:50,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-04-22,18:14,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-05-03,09:05,Hoboken,Christopher St,$2.75,Pay Per Ride
+2025-05-03,22:10,Christopher St,Hoboken,$2.75,Pay Per Ride
+2025-05-07,07:42,Journal Square,World Trade Center,$2.75,Pay Per Ride
+2025-05-07,18:03,World Trade Center,Journal Square,$2.75,Pay Per Ride
+2025-05-15,07:41,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-05-15,18:06,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-05-28,07:46,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-05-28,18:08,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-06-04,07:47,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-06-04,18:05,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-06-08,10:15,Hoboken,World Trade Center,$2.75,Pay Per Ride
+2025-06-08,20:30,World Trade Center,Hoboken,$2.75,Pay Per Ride
+2025-06-12,07:43,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-06-12,18:13,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-06-24,07:49,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-06-24,18:12,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-07-02,08:12,Harrison,World Trade Center,$2.75,Pay Per Ride
+2025-07-02,17:42,World Trade Center,Harrison,$2.75,Pay Per Ride
+2025-07-10,07:39,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-07-10,18:10,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-07-14,07:40,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-07-14,18:14,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-07-27,12:00,Hoboken,Christopher St,$2.75,Pay Per Ride
+2025-07-27,20:45,Christopher St,Hoboken,$2.75,Pay Per Ride
+2025-08-05,07:45,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-08-05,18:07,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-08-09,10:10,Hoboken,World Trade Center,$2.75,Pay Per Ride
+2025-08-09,20:05,World Trade Center,Hoboken,$2.75,Pay Per Ride
+2025-08-19,07:44,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-08-19,18:09,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-08-29,07:46,Journal Square,World Trade Center,$2.75,Pay Per Ride
+2025-08-29,18:12,World Trade Center,Journal Square,$2.75,Pay Per Ride
+2025-09-03,07:42,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-09-03,18:06,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-09-11,07:40,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-09-11,18:04,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-09-23,08:00,Hoboken,Christopher St,$2.75,Pay Per Ride
+2025-09-23,17:55,Christopher St,Hoboken,$2.75,Pay Per Ride
+2025-10-01,07:48,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-10-01,18:11,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-10-09,07:47,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-10-09,18:10,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-10-18,10:45,Hoboken,World Trade Center,$2.75,Pay Per Ride
+2025-10-18,20:10,World Trade Center,Hoboken,$2.75,Pay Per Ride
+2025-10-28,07:50,Journal Square,World Trade Center,$2.75,Pay Per Ride
+2025-10-28,18:09,World Trade Center,Journal Square,$2.75,Pay Per Ride
+2025-11-04,07:46,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-11-04,18:08,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-11-16,11:00,Hoboken,Christopher St,$2.75,Pay Per Ride
+2025-11-16,20:20,Christopher St,Hoboken,$2.75,Pay Per Ride
+2025-11-20,07:44,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-11-20,18:12,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-11-30,09:20,Harrison,World Trade Center,$2.75,Pay Per Ride
+2025-11-30,19:45,World Trade Center,Harrison,$2.75,Pay Per Ride
+2025-12-03,07:43,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-12-03,18:05,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-12-10,07:41,Journal Square,33rd St,$2.75,Pay Per Ride
+2025-12-10,18:06,33rd St,Journal Square,$2.75,Pay Per Ride
+2025-12-21,11:15,Hoboken,Christopher St,$2.75,Pay Per Ride
+2025-12-21,20:00,Christopher St,Hoboken,$2.75,Pay Per Ride

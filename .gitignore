@@ -1,0 +1,29 @@
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Python / backend
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+backend/.pytest_cache/
+backend/.venv/
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Logs / env
+*.log
+.env
+.env.*
+
+# Coverage/build artifacts
+coverage/
+dist/
+build/
