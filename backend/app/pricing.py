@@ -6,11 +6,14 @@ from math import ceil
 import pandas as pd
 
 # Placeholder pricing constants. Verify and update these with current NJ Transit PATH fares.
-SINGLE_RIDE_FARE = 2.75
-MONTHLY_PASS_PRICE = 100.0
+SINGLE_RIDE_FARE = 3.25
+UNLIMITED_1_DAY_PASS_PRICE = 12.50
+UNLIMITED_7_DAY_PASS_PRICE = 42.75
+UNLIMITED_30_DAY_PASS_PRICE = 131.50
 PACK_OPTIONS = [
-    {"name": "10-ride pack", "rides": 10, "price": 26.0},
-    {"name": "20-ride pack", "rides": 20, "price": 50.0},
+    {"name": "10-trip", "rides": 10, "price": 31.0},
+    {"name": "20-trip", "rides": 20, "price": 62.0},
+    {"name": "40-trip", "rides": 40, "price": 124.0},
 ]
 
 
@@ -32,11 +35,32 @@ def _pick_best(options: list[CostOption]) -> tuple[CostOption, float]:
     return best, savings
 
 
-def _month_recommendation(month: str, rides: int) -> dict:
+def _month_recommendation(month: str, month_df: pd.DataFrame) -> dict:
+    rides = int(len(month_df))
+    active_days = int(month_df["ride_date"].dt.date.nunique())
+    active_weeks = int(month_df["ride_date"].dt.to_period("W").nunique())
+
     options = [CostOption("pay_per_ride", rides * SINGLE_RIDE_FARE)]
     for pack in PACK_OPTIONS:
         options.append(CostOption(pack["name"], _pack_cost(rides, pack["rides"], pack["price"])))
-    options.append(CostOption("monthly_pass", MONTHLY_PASS_PRICE if rides > 0 else 0.0))
+    options.append(
+        CostOption(
+            "unlimited_1_day_pass_all_active_days",
+            active_days * UNLIMITED_1_DAY_PASS_PRICE,
+        )
+    )
+    options.append(
+        CostOption(
+            "unlimited_7_day_pass_all_active_weeks",
+            active_weeks * UNLIMITED_7_DAY_PASS_PRICE,
+        )
+    )
+    options.append(
+        CostOption(
+            "unlimited_30_day_pass",
+            UNLIMITED_30_DAY_PASS_PRICE if rides > 0 else 0.0,
+        )
+    )
 
     best, savings = _pick_best(options)
     return {
@@ -54,27 +78,48 @@ def build_recommendation(df: pd.DataFrame) -> dict:
         df.groupby(df["ride_date"].dt.to_period("M")).size().sort_index().rename("rides").astype(int)
     )
     active_months = int((month_counts > 0).sum())
+    active_days = int(df["ride_date"].dt.date.nunique())
+    active_weeks = int(df["ride_date"].dt.to_period("W").nunique())
 
     pay_per_ride = rides * SINGLE_RIDE_FARE
 
     options = [CostOption("pay_per_ride", pay_per_ride)]
     for pack in PACK_OPTIONS:
         options.append(CostOption(pack["name"], _pack_cost(rides, pack["rides"], pack["price"])))
+    options.append(
+        CostOption(
+            "unlimited_1_day_pass_all_active_days",
+            active_days * UNLIMITED_1_DAY_PASS_PRICE,
+        )
+    )
+    options.append(
+        CostOption(
+            "unlimited_7_day_pass_all_active_weeks",
+            active_weeks * UNLIMITED_7_DAY_PASS_PRICE,
+        )
+    )
 
-    monthly_all_active = MONTHLY_PASS_PRICE * active_months
-    monthly_pass_or_best_monthly_alternative = 0.0
-    for _, month_rides in month_counts.items():
+    monthly_all_active = UNLIMITED_30_DAY_PASS_PRICE * active_months
+    unlimited_30_day_or_best_monthly_alternative = 0.0
+    for month, month_rides in month_counts.items():
+        month_df = df[df["ride_date"].dt.to_period("M") == month]
+        month_active_days = int(month_df["ride_date"].dt.date.nunique())
+        month_active_weeks = int(month_df["ride_date"].dt.to_period("W").nunique())
         non_pass_options = [month_rides * SINGLE_RIDE_FARE]
         for pack in PACK_OPTIONS:
             non_pass_options.append(_pack_cost(month_rides, pack["rides"], pack["price"]))
+        non_pass_options.append(month_active_days * UNLIMITED_1_DAY_PASS_PRICE)
+        non_pass_options.append(month_active_weeks * UNLIMITED_7_DAY_PASS_PRICE)
         cheapest_non_pass = min(non_pass_options)
-        monthly_pass_or_best_monthly_alternative += min(MONTHLY_PASS_PRICE, cheapest_non_pass)
+        unlimited_30_day_or_best_monthly_alternative += min(
+            UNLIMITED_30_DAY_PASS_PRICE, cheapest_non_pass
+        )
 
-    options.append(CostOption("monthly_pass_all_active_months", monthly_all_active))
+    options.append(CostOption("unlimited_30_day_pass_all_active_months", monthly_all_active))
     options.append(
         CostOption(
-            "monthly_pass_or_best_monthly_alternative",
-            monthly_pass_or_best_monthly_alternative,
+            "unlimited_30_day_pass_or_best_monthly_alternative",
+            unlimited_30_day_or_best_monthly_alternative,
         )
     )
 
@@ -87,8 +132,8 @@ def build_recommendation(df: pd.DataFrame) -> dict:
     )
 
     per_month = [
-        _month_recommendation(str(month), int(count))
-        for month, count in month_counts.items()
+        _month_recommendation(str(month), df[df["ride_date"].dt.to_period("M") == month])
+        for month in month_counts.index
     ]
 
     return {
