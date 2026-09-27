@@ -17,7 +17,7 @@ A personal web app for analyzing a 12-month NJ Transit PATH (TAPP) ride CSV expo
 ### 1) Backend
 
 ```bash
-cd /home/runner/work/tapp-path-tracker/tapp-path-tracker/backend
+cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -29,7 +29,7 @@ API will be available at `http://localhost:8000`.
 ### 2) Frontend
 
 ```bash
-cd /home/runner/work/tapp-path-tracker/tapp-path-tracker/frontend
+cd frontend
 npm install
 npm run dev
 ```

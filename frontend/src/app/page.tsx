@@ -105,7 +105,9 @@ export default function Home() {
       <p>Upload your NJ Transit PATH ride CSV to analyze usage, spend, and best fare plan.</p>
 
       <section className={styles.uploadCard}>
+        <label htmlFor="csv-upload">CSV file</label>
         <input
+          id="csv-upload"
           type="file"
           accept=".csv,text/csv"
           onChange={(event) => setFile(event.target.files?.[0] ?? null)}
@@ -113,7 +115,11 @@ export default function Home() {
         <button onClick={handleUpload} disabled={loading}>
           {loading ? "Uploading..." : "Upload CSV"}
         </button>
-        {error ? <p className={styles.error}>{error}</p> : null}
+        {error ? (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        ) : null}
       </section>
 
       {data ? (

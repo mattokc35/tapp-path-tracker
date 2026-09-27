@@ -17,7 +17,7 @@ class SummaryStats(BaseModel):
 
 class MonthlyRidesPoint(BaseModel):
     month: str
-    rides: float
+    rides: int
 
 
 class MonthlySpendPoint(BaseModel):

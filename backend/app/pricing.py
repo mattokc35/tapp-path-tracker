@@ -62,16 +62,21 @@ def build_recommendation(df: pd.DataFrame) -> dict:
         options.append(CostOption(pack["name"], _pack_cost(rides, pack["rides"], pack["price"])))
 
     monthly_all_active = MONTHLY_PASS_PRICE * active_months
-    monthly_selective = 0.0
+    monthly_pass_or_best_monthly_alternative = 0.0
     for _, month_rides in month_counts.items():
         non_pass_options = [month_rides * SINGLE_RIDE_FARE]
         for pack in PACK_OPTIONS:
             non_pass_options.append(_pack_cost(month_rides, pack["rides"], pack["price"]))
         cheapest_non_pass = min(non_pass_options)
-        monthly_selective += min(MONTHLY_PASS_PRICE, cheapest_non_pass)
+        monthly_pass_or_best_monthly_alternative += min(MONTHLY_PASS_PRICE, cheapest_non_pass)
 
     options.append(CostOption("monthly_pass_all_active_months", monthly_all_active))
-    options.append(CostOption("monthly_pass_selective", monthly_selective))
+    options.append(
+        CostOption(
+            "monthly_pass_or_best_monthly_alternative",
+            monthly_pass_or_best_monthly_alternative,
+        )
+    )
 
     best, savings = _pick_best(options)
 
