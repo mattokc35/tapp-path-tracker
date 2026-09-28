@@ -3,19 +3,42 @@
   margin: 0 auto;
   padding: 2rem;
   display: grid;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
-.main h1 {
+.hero {
+  text-align: center;
+  padding: 1rem 1rem 0.5rem;
+  display: grid;
+  gap: 0.6rem;
+  justify-items: center;
+}
+
+.heroBadge {
+  display: inline-block;
+  background: rgba(255, 106, 19, 0.15);
+  color: var(--path-orange);
+  border: 1px solid rgba(255, 106, 19, 0.4);
+  border-radius: 999px;
+  padding: 0.25rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
   color: var(--foreground);
   letter-spacing: 0.5px;
+  font-size: 2.25rem;
 }
 
-.main > p {
+.hero > p {
   color: #c9d3e0;
+  max-width: 560px;
+  line-height: 1.5;
 }
 
-.uploadCard,
 .card {
   border: 1px solid var(--surface-border);
   border-radius: 10px;
@@ -25,66 +48,274 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
+.card h2,
+.card h3 {
+  color: var(--path-blue-dark);
+}
+
+/* Upload card */
+
 .uploadCard {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  flex-wrap: wrap;
-  border-top: 4px solid var(--path-blue);
-}
-
-.uploadCard label {
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  background: var(--surface);
   color: var(--surface-text);
-  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-top: 4px solid var(--path-blue);
+  display: grid;
+  gap: 1rem;
 }
 
-.uploadCard p {
+.uploadHeader h2 {
+  color: var(--path-blue-dark);
+  font-size: 1.35rem;
+}
+
+.uploadHeader p {
+  color: var(--surface-muted);
+  font-size: 0.9rem;
+  margin-top: 0.15rem;
+}
+
+.dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  border: 2px dashed var(--surface-border);
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out, background 0.15s ease-in-out;
+}
+
+.dropzone:hover {
+  border-color: var(--path-blue-light);
+  background: #f0f6ff;
+}
+
+.dropzoneActive {
+  border-color: var(--path-blue);
+  background: #eaf1fd;
+}
+
+.dropzoneInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dropzoneIcon {
+  font-size: 1.75rem;
+  color: var(--path-blue);
+}
+
+.dropzoneText {
+  font-weight: 700;
+  color: var(--surface-text);
+}
+
+.dropzoneHint {
+  font-size: 0.85rem;
+  color: var(--surface-muted);
+}
+
+.fileChip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  background: #eef2f7;
+  border: 1px solid var(--surface-border);
+}
+
+.fileChipIcon {
+  font-size: 1.1rem;
+}
+
+.fileChipName {
+  font-weight: 600;
+  color: var(--surface-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileChipSize {
   color: var(--surface-muted);
   font-size: 0.85rem;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
-.uploadCard code {
+.fileChipRemove {
+  border: 0;
+  background: transparent;
+  color: var(--surface-muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: background 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.fileChipRemove:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.uploadHint {
+  color: var(--surface-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.uploadHint code {
   background: #eef2f7;
   color: var(--surface-text);
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
 }
 
-.uploadCard input[type="file"] {
+.advanced {
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+}
+
+.advancedSummary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--path-blue-dark);
+  padding: 0.4rem 0;
+  list-style: none;
+}
+
+.advancedSummary::-webkit-details-marker {
+  display: none;
+}
+
+.advancedSummary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.4rem;
+  transition: transform 0.15s ease-in-out;
+}
+
+.advanced[open] .advancedSummary::before {
+  transform: rotate(90deg);
+}
+
+.priceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem 0 0.5rem;
+}
+
+.priceField {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--surface-text);
 }
 
-.uploadCard input[type="number"] {
-  color: var(--surface-text);
-  background: #fff;
+.priceInputWrap {
+  display: flex;
+  align-items: center;
   border: 1px solid var(--surface-border);
   border-radius: 6px;
-  padding: 0.4rem 0.5rem;
+  overflow: hidden;
+  background: #fff;
 }
 
-.uploadCard button {
+.priceInputPrefix {
+  padding: 0.4rem 0.5rem;
+  background: #eef2f7;
+  color: var(--surface-muted);
+  font-weight: 600;
+}
+
+.priceInputWrap input[type="number"] {
   border: 0;
-  border-radius: 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+  color: var(--surface-text);
+}
+
+.priceInputWrap input[type="number"]:focus {
+  outline: none;
+}
+
+.submitRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submitButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 8px;
   background: var(--path-blue);
   color: #fff;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
+  padding: 0.7rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s ease-in-out;
+  transition: background 0.15s ease-in-out, transform 0.05s ease-in-out;
 }
 
-.uploadCard button:hover:not(:disabled) {
+.submitButton:hover:not(:disabled) {
   background: var(--path-blue-dark);
 }
 
-.uploadCard button:disabled {
-  opacity: 0.6;
+.submitButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.card h2,
-.card h3 {
-  color: var(--path-blue-dark);
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.alertError {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .summaryGrid {
