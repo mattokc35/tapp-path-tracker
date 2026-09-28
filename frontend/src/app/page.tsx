@@ -1,6 +1,7 @@
 "use client";
 
-import { ChangeEvent, useMemo, useState } from "react";
+import type { ChangeEvent, DragEvent } from "react";
+import { useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -126,8 +127,15 @@ const transformResponse = (payload: BackendAnalysisResponse): AnalysisResponse =
   trip_history: payload.trip_history.map(transformTripRecord),
 });
 
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalysisResponse | null>(null);
@@ -151,6 +159,28 @@ export default function Home() {
     (field: keyof PackPriceInputs) => (event: ChangeEvent<HTMLInputElement>) => {
       setPackPrices((current) => ({ ...current, [field]: event.target.value }));
     };
+
+  const handleFileSelect = (selected: File | null) => {
+    setError(null);
+    setFile(selected);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const dropped = event.dataTransfer.files?.[0];
+    if (dropped) handleFileSelect(dropped);
+  };
 
   const handleUpload = async () => {
     setError(null);
@@ -195,97 +225,184 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <h1>TAPP PATH Tracker</h1>
-      <p>Upload your NJ Transit PATH trip-history CSV to analyze usage, stored-value spend, and fare options.</p>
+      <section className={styles.hero}>
+        <span className={styles.heroBadge}>NJ Transit PATH</span>
+        <h1>TAPP Path Tracker</h1>
+        <p>
+          Upload your PATH trip-history CSV to see usage trends, stored-value spend, and the
+          fare plan that saves you the most.
+        </p>
+      </section>
 
       <section className={styles.uploadCard}>
-        <label htmlFor="csv-upload">CSV file</label>
-        <input
-          id="csv-upload"
-          type="file"
-          accept=".csv,text/csv"
-          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-        />
-        <p>
-          Expected headers: Reference, Transit Account #, Trip time, Mode, Location, Product Type,
-          Fare Amount ($).
-        </p>
-        <p>
-          Transit account values like <code>=&quot;100060443445&quot;</code> are cleaned
+        <div className={styles.uploadHeader}>
+          <h2>Upload trip history</h2>
+          <p>Drop your TAPP export below, or browse to select the file.</p>
+        </div>
+
+        <label
+          htmlFor="csv-upload"
+          className={`${styles.dropzone} ${isDragging ? styles.dropzoneActive : ""}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <input
+            id="csv-upload"
+            type="file"
+            accept=".csv,text/csv"
+            className={styles.dropzoneInput}
+            onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
+          />
+          <span className={styles.dropzoneIcon} aria-hidden="true">
+            ⬆
+          </span>
+          <span className={styles.dropzoneText}>
+            {isDragging ? "Drop your CSV to upload" : "Drag & drop your CSV here"}
+          </span>
+          <span className={styles.dropzoneHint}>or click to browse files</span>
+        </label>
+
+        {file ? (
+          <div className={styles.fileChip}>
+            <span className={styles.fileChipIcon} aria-hidden="true">
+              📄
+            </span>
+            <span className={styles.fileChipName}>{file.name}</span>
+            <span className={styles.fileChipSize}>{formatFileSize(file.size)}</span>
+            <button
+              type="button"
+              className={styles.fileChipRemove}
+              onClick={() => handleFileSelect(null)}
+              aria-label="Remove selected file"
+            >
+              ✕
+            </button>
+          </div>
+        ) : null}
+
+        <p className={styles.uploadHint}>
+          Expected headers: Reference, Transit Account #, Trip time, Mode, Location, Product
+          Type, Fare Amount ($). Values like <code>=&quot;100060443445&quot;</code> are cleaned
           automatically, and <code>-</code> fares are treated as pass-based rides.
         </p>
-        <label htmlFor="ten-trip-price">Optional 10-Trip price override</label>
-        <input
-          id="ten-trip-price"
-          type="number"
-          min="0"
-          step="0.01"
-          value={packPrices.tenTrip}
-          onChange={handlePackPriceChange("tenTrip")}
-        />
-        <label htmlFor="twenty-trip-price">Optional 20-Trip price override</label>
-        <input
-          id="twenty-trip-price"
-          type="number"
-          min="0"
-          step="0.01"
-          value={packPrices.twentyTrip}
-          onChange={handlePackPriceChange("twentyTrip")}
-        />
-        <label htmlFor="forty-trip-price">Optional 40-Trip price override</label>
-        <input
-          id="forty-trip-price"
-          type="number"
-          min="0"
-          step="0.01"
-          value={packPrices.fortyTrip}
-          onChange={handlePackPriceChange("fortyTrip")}
-        />
-        <button onClick={handleUpload} disabled={loading}>
-          {loading ? "Uploading..." : "Upload CSV"}
-        </button>
+
+        <details className={styles.advanced}>
+          <summary className={styles.advancedSummary}>Optional: override pack pricing</summary>
+          <div className={styles.priceGrid}>
+            <label className={styles.priceField}>
+              <span>10-Trip price</span>
+              <div className={styles.priceInputWrap}>
+                <span className={styles.priceInputPrefix}>$</span>
+                <input
+                  id="ten-trip-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="31.00"
+                  value={packPrices.tenTrip}
+                  onChange={handlePackPriceChange("tenTrip")}
+                />
+              </div>
+            </label>
+            <label className={styles.priceField}>
+              <span>20-Trip price</span>
+              <div className={styles.priceInputWrap}>
+                <span className={styles.priceInputPrefix}>$</span>
+                <input
+                  id="twenty-trip-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="62.00"
+                  value={packPrices.twentyTrip}
+                  onChange={handlePackPriceChange("twentyTrip")}
+                />
+              </div>
+            </label>
+            <label className={styles.priceField}>
+              <span>40-Trip price</span>
+              <div className={styles.priceInputWrap}>
+                <span className={styles.priceInputPrefix}>$</span>
+                <input
+                  id="forty-trip-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="124.00"
+                  value={packPrices.fortyTrip}
+                  onChange={handlePackPriceChange("fortyTrip")}
+                />
+              </div>
+            </label>
+          </div>
+        </details>
+
+        <div className={styles.submitRow}>
+          <button
+            className={styles.submitButton}
+            onClick={handleUpload}
+            disabled={loading || !file}
+          >
+            {loading ? (
+              <>
+                <span className={styles.spinner} aria-hidden="true" />
+                Analyzing...
+              </>
+            ) : (
+              "Analyze CSV"
+            )}
+          </button>
+        </div>
+
         {error ? (
-          <p className={styles.error} role="alert">
-            {error}
-          </p>
+          <div className={styles.alertError} role="alert">
+            <span aria-hidden="true">⚠</span>
+            <span>{error}</span>
+          </div>
         ) : null}
       </section>
 
       {data ? (
         <>
+          <h2 className={styles.sectionTitle}>Overview</h2>
           <section className={styles.summaryGrid}>
-            <div className={styles.card}>
-              <h3>Total rides</h3>
-              <p>{data.summary.total_rides}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Total rides</span>
+              <span className={styles.statValue}>{data.summary.total_rides}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Stored Value spend</h3>
-              <p>${data.summary.total_spent.toFixed(2)}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Stored Value spend</span>
+              <span className={styles.statValue}>${data.summary.total_spent.toFixed(2)}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Stored Value avg fare</h3>
-              <p>${data.summary.average_stored_value_fare.toFixed(2)}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Stored Value avg fare</span>
+              <span className={styles.statValue}>
+                ${data.summary.average_stored_value_fare.toFixed(2)}
+              </span>
             </div>
-            <div className={styles.card}>
-              <h3>Stored Value rides</h3>
-              <p>{data.summary.stored_value_ride_count}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Stored Value rides</span>
+              <span className={styles.statValue}>{data.summary.stored_value_ride_count}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Pass-based rides</h3>
-              <p>{data.summary.pass_ride_count}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Pass-based rides</span>
+              <span className={styles.statValue}>{data.summary.pass_ride_count}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Date range</h3>
-              <p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Date range</span>
+              <span className={styles.statValueSmall}>
                 {data.summary.date_range.start} to {data.summary.date_range.end}
-              </p>
+              </span>
             </div>
           </section>
 
+          <h2 className={styles.sectionTitle}>Usage trends</h2>
           <section className={styles.chartGrid}>
             <div className={styles.card}>
               <h3>Rides per month</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.rides_per_month}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
@@ -294,12 +411,14 @@ export default function Home() {
                   <Legend />
                   <Bar dataKey="rides" name="Rides" fill="#2563eb" />
                 </BarChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className={styles.card}>
               <h3>Stored Value spend per month</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.spend_per_month}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
@@ -308,12 +427,14 @@ export default function Home() {
                   <Legend />
                   <Line type="monotone" dataKey="spend" name="Spend ($)" stroke="#16a34a" />
                 </LineChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className={styles.card}>
               <h3>Rides by day of week</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.rides_by_day_of_week}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="day" />
@@ -322,12 +443,14 @@ export default function Home() {
                   <Legend />
                   <Bar dataKey="rides" fill="#7c3aed" />
                 </BarChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className={styles.card}>
               <h3>Most-used locations</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.rides_by_location}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="location" interval={0} angle={-20} textAnchor="end" height={70} />
@@ -336,76 +459,82 @@ export default function Home() {
                   <Legend />
                   <Bar dataKey="rides" fill="#ea580c" />
                 </BarChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </section>
+
+          <h2 className={styles.sectionTitle}>Product & plan details</h2>
+          <section className={styles.card}>
+            <h3>Product type breakdown</h3>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Product Type</th>
+                    <th>Rides</th>
+                    <th>Stored Value Spend</th>
+                    <th>Effective Cost / Ride</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.product_type_breakdown.map((product) => (
+                    <tr key={product.product_type}>
+                      <td>{product.product_type}</td>
+                      <td>{product.rides}</td>
+                      <td>${product.total_spend.toFixed(2)}</td>
+                      <td>{formatCurrency(product.effective_cost_per_ride)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className={styles.recommendationCard}>
+            <span className={styles.recommendationBadge}>Best value</span>
+            <h3>{formatPlanName(data.recommendation.overall.best_option)}</h3>
+            <p>{data.recommendation.overall.reasoning}</p>
+            <p className={styles.recommendationSavings}>
+              Estimated savings vs next best: $
+              {data.recommendation.overall.savings_vs_next_best.toFixed(2)}
+            </p>
+
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Plan</th>
+                    <th>Estimated total cost</th>
+                    <th>Best choice</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recommendationRows.map((row) => (
+                    <tr key={row.plan} className={row.isBest ? styles.bestRow : undefined}>
+                      <td>{row.planLabel}</td>
+                      <td>${row.cost.toFixed(2)}</td>
+                      <td>{row.isBest ? <span className={styles.bestBadge}>✓ Best</span> : ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </section>
 
           <section className={styles.card}>
-            <h3>Product type breakdown</h3>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Product Type</th>
-                  <th>Rides</th>
-                  <th>Stored Value Spend</th>
-                  <th>Effective Cost / Ride</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.product_type_breakdown.map((product) => (
-                  <tr key={product.product_type}>
-                    <td>{product.product_type}</td>
-                    <td>{product.rides}</td>
-                    <td>${product.total_spend.toFixed(2)}</td>
-                    <td>{formatCurrency(product.effective_cost_per_ride)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          <section className={styles.card}>
-            <h3>Recommendation</h3>
-            <p>
-              <strong>Best plan:</strong> {formatPlanName(data.recommendation.overall.best_option)}
-            </p>
-            <p>{data.recommendation.overall.reasoning}</p>
-            <p>
-              Estimated savings vs next best: ${data.recommendation.overall.savings_vs_next_best.toFixed(2)}
-            </p>
-
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Plan</th>
-                  <th>Estimated total cost</th>
-                  <th>Best choice</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recommendationRows.map((row) => (
-                  <tr key={row.plan}>
-                    <td>{row.planLabel}</td>
-                    <td>${row.cost.toFixed(2)}</td>
-                    <td>{row.isBest ? "Yes" : ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          <section className={styles.card}>
             <h3>Trip history</h3>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Reference</th>
-                  <th>Transit Account #</th>
-                  <th>Trip Time</th>
-                  <th>Mode</th>
-                  <th>Location</th>
-                  <th>Product Type</th>
-                  <th>Fare Amount</th>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Transit Account #</th>
+                    <th>Trip Time</th>
+                    <th>Mode</th>
+                    <th>Location</th>
+                    <th>Product Type</th>
+                    <th>Fare Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -422,6 +551,7 @@ export default function Home() {
                 ))}
               </tbody>
             </table>
+            </div>
           </section>
         </>
       ) : null}
