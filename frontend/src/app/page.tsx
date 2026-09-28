@@ -192,6 +192,25 @@ export default function Home() {
     });
   }, [data]);
 
+  const bestPlanStats = useMemo(() => {
+    if (!data) return null;
+    const { overall } = data.recommendation;
+    const bestCost = overall.options[overall.best_option];
+    const singleRideCost = overall.options.pay_per_ride ?? null;
+    if (bestCost == null) return null;
+
+    const monthCount = Math.max(1, data.rides_per_month.length);
+    const monthlyCost = bestCost / monthCount;
+    const totalSavingsVsSingleRide =
+      overall.best_option !== "pay_per_ride" && singleRideCost != null
+        ? singleRideCost - bestCost
+        : null;
+    const monthlySavingsVsSingleRide =
+      totalSavingsVsSingleRide != null ? totalSavingsVsSingleRide / monthCount : null;
+
+    return { monthlyCost, monthlySavingsVsSingleRide, monthCount };
+  }, [data]);
+
   const locationsChartHeight = useMemo(() => {
     if (!data) return 300;
     return Math.min(520, Math.max(280, data.rides_by_location.length * 34 + 40));
@@ -577,6 +596,38 @@ export default function Home() {
               Estimated savings vs next best: $
               {data.recommendation.overall.savings_vs_next_best.toFixed(2)}
             </p>
+
+            {bestPlanStats && (
+              <div className={styles.recommendationStats}>
+                <div className={styles.recommendationStat}>
+                  <span className={styles.recommendationStatLabel}>Estimated monthly cost</span>
+                  <span className={styles.recommendationStatValue}>
+                    ${bestPlanStats.monthlyCost.toFixed(2)}
+                  </span>
+                </div>
+                <div className={styles.recommendationStat}>
+                  <span className={styles.recommendationStatLabel}>Estimated monthly savings</span>
+                  {bestPlanStats.monthlySavingsVsSingleRide == null ? (
+                    <span className={styles.recommendationStatValue}>—</span>
+                  ) : bestPlanStats.monthlySavingsVsSingleRide > 0.004 ? (
+                    <span className={`${styles.recommendationStatValue} ${styles.savingsGood}`}>
+                      Save ${bestPlanStats.monthlySavingsVsSingleRide.toFixed(2)}/mo
+                    </span>
+                  ) : bestPlanStats.monthlySavingsVsSingleRide < -0.004 ? (
+                    <span className={`${styles.recommendationStatValue} ${styles.savingsBad}`}>
+                      +${Math.abs(bestPlanStats.monthlySavingsVsSingleRide).toFixed(2)}/mo more
+                    </span>
+                  ) : (
+                    <span className={styles.recommendationStatValue}>Even vs. single ride</span>
+                  )}
+                </div>
+                <p className={styles.recommendationStatNote}>
+                  Based on {bestPlanStats.monthCount}{" "}
+                  {bestPlanStats.monthCount === 1 ? "month" : "months"} of ride history, compared
+                  to paying per ride.
+                </p>
+              </div>
+            )}
 
             <div className={styles.tableWrap}>
               <table className={styles.table}>
