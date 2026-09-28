@@ -369,11 +369,15 @@
 .chartGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .chartBox {
-  height: 260px;
+  height: 300px;
+}
+
+.locationsCard {
+  grid-column: 1 / -1;
 }
 
 .error {
@@ -434,6 +438,21 @@
   font-size: 0.8rem;
   border-radius: 999px;
   padding: 0.15rem 0.6rem;
+}
+
+.savingsGood {
+  color: #15803d;
+  font-weight: 700;
+}
+
+.savingsBad {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.savingsBaseline {
+  color: var(--surface-muted);
+  font-weight: 600;
 }
 
 .table {
