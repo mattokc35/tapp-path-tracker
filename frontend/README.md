@@ -17,5 +17,5 @@ npm install
 npm run dev
 ```
 
-By default, uploads are sent to `http://localhost:8000/api/upload`.
+By default, uploads are sent to `http://localhost:8003/api/upload`.
 Set `NEXT_PUBLIC_BACKEND_URL` if your backend runs elsewhere.

@@ -84,7 +84,7 @@ type PackPriceInputs = {
   fortyTrip: string;
 };
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8003";
 const PLAN_LABELS: Record<string, string> = {
   pay_per_ride: "Single Ride ($3.25)",
   "10-trip": "10-Trip",
