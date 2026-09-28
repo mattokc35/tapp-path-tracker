@@ -401,7 +401,8 @@ export default function Home() {
           <section className={styles.chartGrid}>
             <div className={styles.card}>
               <h3>Rides per month</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.rides_per_month}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
@@ -410,12 +411,14 @@ export default function Home() {
                   <Legend />
                   <Bar dataKey="rides" name="Rides" fill="#2563eb" />
                 </BarChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className={styles.card}>
               <h3>Stored Value spend per month</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.spend_per_month}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
@@ -424,12 +427,14 @@ export default function Home() {
                   <Legend />
                   <Line type="monotone" dataKey="spend" name="Spend ($)" stroke="#16a34a" />
                 </LineChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className={styles.card}>
               <h3>Rides by day of week</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.rides_by_day_of_week}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="day" />
@@ -438,12 +443,14 @@ export default function Home() {
                   <Legend />
                   <Bar dataKey="rides" fill="#7c3aed" />
                 </BarChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className={styles.card}>
               <h3>Most-used locations</h3>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className={styles.chartBox}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.rides_by_location}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="location" interval={0} angle={-20} textAnchor="end" height={70} />
@@ -452,7 +459,8 @@ export default function Home() {
                   <Legend />
                   <Bar dataKey="rides" fill="#ea580c" />
                 </BarChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              </div>
             </div>
           </section>
 

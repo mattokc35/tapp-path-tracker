@@ -372,6 +372,10 @@
   gap: 1rem;
 }
 
+.chartBox {
+  height: 260px;
+}
+
 .error {
   color: #dc2626;
   font-weight: 600;
@@ -458,4 +462,80 @@
 
 .table tr:hover td {
   background: #f5f8fd;
+}
+
+/* Mobile breakpoints */
+
+@media (max-width: 720px) {
+  .main {
+    padding: 1.25rem;
+    gap: 1.1rem;
+  }
+
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .hero > p {
+    font-size: 0.9rem;
+  }
+
+  .uploadCard {
+    padding: 1.1rem;
+  }
+
+  .dropzone {
+    padding: 1.5rem 1rem;
+  }
+
+  .dropzoneIcon {
+    font-size: 1.4rem;
+  }
+
+  .submitRow {
+    justify-content: stretch;
+  }
+
+  .submitButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .summaryGrid,
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statValue {
+    font-size: 1.4rem;
+  }
+
+  .chartBox {
+    height: 220px;
+  }
+
+  .priceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .card,
+  .recommendationCard {
+    padding: 1rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.4rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero h1 {
+    font-size: 1.4rem;
+  }
+
+  .fileChipSize {
+    display: none;
+  }
 }
