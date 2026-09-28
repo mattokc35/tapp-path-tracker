@@ -3,12 +3,11 @@
 import type { ChangeEvent, DragEvent } from "react";
 import { useMemo, useState } from "react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -101,6 +100,16 @@ const PLAN_LABELS: Record<string, string> = {
 const formatPlanName = (planKey: string) =>
   PLAN_LABELS[planKey] ?? planKey.replaceAll("_", " ");
 
+// Longest keys first so labels like "unlimited_30_day_pass_all_active_months" aren't
+// partially replaced by the shorter "unlimited_30_day_pass" key.
+const SORTED_PLAN_KEYS = Object.keys(PLAN_LABELS).sort((a, b) => b.length - a.length);
+
+const formatReasoning = (reasoning: string) =>
+  SORTED_PLAN_KEYS.reduce(
+    (text, key) => text.replaceAll(key, PLAN_LABELS[key]),
+    reasoning,
+  );
+
 const formatCurrency = (value: number | null) => (value == null ? "—" : `$${value.toFixed(2)}`);
 
 const formatTripTime = (value: string) =>
@@ -111,6 +120,26 @@ const formatTripTime = (value: string) =>
     hour: "numeric",
     minute: "2-digit",
   });
+
+const formatDateValue = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return value;
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+};
+
+const CHART_MARGIN = { top: 8, right: 16, left: 0, bottom: 8 };
+const AXIS_TICK_STYLE = { fontSize: 12, fill: "#64748b" };
+const TOOLTIP_CONTENT_STYLE = {
+  borderRadius: 8,
+  border: "1px solid #e2e8f0",
+  fontSize: 13,
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+};
 
 const transformTripRecord = (trip: BackendTripRecord): TripRecord => ({
   reference: trip.reference,
@@ -147,12 +176,34 @@ export default function Home() {
 
   const recommendationRows = useMemo(() => {
     if (!data) return [];
-    return Object.entries(data.recommendation.overall.options).map(([plan, cost]) => ({
-      plan,
-      planLabel: formatPlanName(plan),
-      cost,
-      isBest: plan === data.recommendation.overall.best_option,
-    }));
+    const singleRideCost = data.recommendation.overall.options.pay_per_ride ?? null;
+    return Object.entries(data.recommendation.overall.options).map(([plan, cost]) => {
+      const isSingleRide = plan === "pay_per_ride";
+      const savingsVsSingleRide =
+        !isSingleRide && singleRideCost != null ? singleRideCost - cost : null;
+      return {
+        plan,
+        planLabel: formatPlanName(plan),
+        cost,
+        isBest: plan === data.recommendation.overall.best_option,
+        isSingleRide,
+        savingsVsSingleRide,
+      };
+    });
+  }, [data]);
+
+  const locationsChartHeight = useMemo(() => {
+    if (!data) return 300;
+    return Math.min(520, Math.max(280, data.rides_by_location.length * 34 + 40));
+  }, [data]);
+
+  const locationsAxisWidth = useMemo(() => {
+    if (!data) return 130;
+    const longest = data.rides_by_location.reduce(
+      (max, entry) => Math.max(max, entry.location.length),
+      0,
+    );
+    return Math.min(220, Math.max(90, longest * 7 + 16));
   }, [data]);
 
   const handlePackPriceChange =
@@ -392,7 +443,8 @@ export default function Home() {
             <div className={styles.statCard}>
               <span className={styles.statLabel}>Date range</span>
               <span className={styles.statValueSmall}>
-                {data.summary.date_range.start} to {data.summary.date_range.end}
+                {formatDateValue(data.summary.date_range.start)} –{" "}
+                {formatDateValue(data.summary.date_range.end)}
               </span>
             </div>
           </section>
@@ -403,14 +455,13 @@ export default function Home() {
               <h3>Rides per month</h3>
               <div className={styles.chartBox}>
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.rides_per_month}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="rides" name="Rides" fill="#2563eb" />
-                </BarChart>
+                  <BarChart data={data.rides_per_month} margin={CHART_MARGIN}>
+                    <CartesianGrid vertical={false} stroke="#e5e7eb" />
+                    <XAxis dataKey="month" tick={AXIS_TICK_STYLE} tickLine={false} axisLine={{ stroke: "#e2e8f0" }} />
+                    <YAxis tick={AXIS_TICK_STYLE} tickLine={false} axisLine={false} width={36} />
+                    <Tooltip contentStyle={TOOLTIP_CONTENT_STYLE} cursor={{ fill: "rgba(37, 99, 235, 0.08)" }} />
+                    <Bar dataKey="rides" name="Rides" fill="#2563eb" radius={[6, 6, 0, 0]} maxBarSize={56} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -419,14 +470,31 @@ export default function Home() {
               <h3>Stored Value spend per month</h3>
               <div className={styles.chartBox}>
                 <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data.spend_per_month}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="spend" name="Spend ($)" stroke="#16a34a" />
-                </LineChart>
+                  <AreaChart data={data.spend_per_month} margin={CHART_MARGIN}>
+                    <defs>
+                      <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#16a34a" stopOpacity={0.35} />
+                        <stop offset="100%" stopColor="#16a34a" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid vertical={false} stroke="#e5e7eb" />
+                    <XAxis dataKey="month" tick={AXIS_TICK_STYLE} tickLine={false} axisLine={{ stroke: "#e2e8f0" }} />
+                    <YAxis tick={AXIS_TICK_STYLE} tickLine={false} axisLine={false} width={40} />
+                    <Tooltip
+                      contentStyle={TOOLTIP_CONTENT_STYLE}
+                      formatter={(value) => [`$${Number(value).toFixed(2)}`, "Spend"]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="spend"
+                      name="Spend ($)"
+                      stroke="#16a34a"
+                      strokeWidth={2.5}
+                      fill="url(#spendGradient)"
+                      dot={{ r: 3, fill: "#16a34a" }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -435,30 +503,40 @@ export default function Home() {
               <h3>Rides by day of week</h3>
               <div className={styles.chartBox}>
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.rides_by_day_of_week}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="rides" fill="#7c3aed" />
-                </BarChart>
+                  <BarChart data={data.rides_by_day_of_week} margin={CHART_MARGIN}>
+                    <CartesianGrid vertical={false} stroke="#e5e7eb" />
+                    <XAxis dataKey="day" tick={AXIS_TICK_STYLE} tickLine={false} axisLine={{ stroke: "#e2e8f0" }} />
+                    <YAxis tick={AXIS_TICK_STYLE} tickLine={false} axisLine={false} width={36} />
+                    <Tooltip contentStyle={TOOLTIP_CONTENT_STYLE} cursor={{ fill: "rgba(124, 58, 237, 0.08)" }} />
+                    <Bar dataKey="rides" name="Rides" fill="#7c3aed" radius={[6, 6, 0, 0]} maxBarSize={56} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className={styles.card}>
+            <div className={`${styles.card} ${styles.locationsCard}`}>
               <h3>Most-used locations</h3>
-              <div className={styles.chartBox}>
+              <div className={styles.chartBox} style={{ height: locationsChartHeight }}>
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.rides_by_location}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="location" interval={0} angle={-20} textAnchor="end" height={70} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="rides" fill="#ea580c" />
-                </BarChart>
+                  <BarChart
+                    data={data.rides_by_location}
+                    layout="vertical"
+                    margin={{ top: 8, right: 24, left: 8, bottom: 8 }}
+                  >
+                    <CartesianGrid horizontal={false} stroke="#e5e7eb" />
+                    <XAxis type="number" tick={AXIS_TICK_STYLE} tickLine={false} axisLine={{ stroke: "#e2e8f0" }} />
+                    <YAxis
+                      type="category"
+                      dataKey="location"
+                      tick={AXIS_TICK_STYLE}
+                      tickLine={false}
+                      axisLine={false}
+                      width={locationsAxisWidth}
+                      interval={0}
+                    />
+                    <Tooltip contentStyle={TOOLTIP_CONTENT_STYLE} cursor={{ fill: "rgba(234, 88, 12, 0.08)" }} />
+                    <Bar dataKey="rides" name="Rides" fill="#ea580c" radius={[0, 6, 6, 0]} maxBarSize={22} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -494,7 +572,7 @@ export default function Home() {
           <section className={styles.recommendationCard}>
             <span className={styles.recommendationBadge}>Best value</span>
             <h3>{formatPlanName(data.recommendation.overall.best_option)}</h3>
-            <p>{data.recommendation.overall.reasoning}</p>
+            <p>{formatReasoning(data.recommendation.overall.reasoning)}</p>
             <p className={styles.recommendationSavings}>
               Estimated savings vs next best: $
               {data.recommendation.overall.savings_vs_next_best.toFixed(2)}
@@ -506,6 +584,7 @@ export default function Home() {
                   <tr>
                     <th>Plan</th>
                     <th>Estimated total cost</th>
+                    <th>Vs. Single Ride</th>
                     <th>Best choice</th>
                   </tr>
                 </thead>
@@ -514,6 +593,23 @@ export default function Home() {
                     <tr key={row.plan} className={row.isBest ? styles.bestRow : undefined}>
                       <td>{row.planLabel}</td>
                       <td>${row.cost.toFixed(2)}</td>
+                      <td>
+                        {row.isSingleRide ? (
+                          <span className={styles.savingsBaseline}>Baseline</span>
+                        ) : row.savingsVsSingleRide == null ? (
+                          "—"
+                        ) : row.savingsVsSingleRide > 0.004 ? (
+                          <span className={styles.savingsGood}>
+                            Save ${row.savingsVsSingleRide.toFixed(2)}
+                          </span>
+                        ) : row.savingsVsSingleRide < -0.004 ? (
+                          <span className={styles.savingsBad}>
+                            +${Math.abs(row.savingsVsSingleRide).toFixed(2)} more
+                          </span>
+                        ) : (
+                          <span className={styles.savingsBaseline}>Even</span>
+                        )}
+                      </td>
                       <td>{row.isBest ? <span className={styles.bestBadge}>✓ Best</span> : ""}</td>
                     </tr>
                   ))}
