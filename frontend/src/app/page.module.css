@@ -324,6 +324,48 @@
   gap: 1rem;
 }
 
+.sectionTitle {
+  color: var(--foreground);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-top: 0.5rem;
+  padding-left: 0.7rem;
+  border-left: 4px solid var(--path-orange);
+}
+
+.statCard {
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  color: var(--surface-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.statLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--surface-muted);
+}
+
+.statValue {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--path-blue-dark);
+}
+
+.statValueSmall {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--path-blue-dark);
+}
+
 .chartGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -336,10 +378,63 @@
   margin: 0;
 }
 
+.recommendationCard {
+  position: relative;
+  border-radius: 10px;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #eaf1fd 0%, #ffffff 60%);
+  color: var(--surface-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--surface-border);
+  border-top: 4px solid var(--path-orange);
+}
+
+.recommendationBadge {
+  display: inline-block;
+  background: var(--path-orange);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  margin-bottom: 0.4rem;
+}
+
+.recommendationCard h3 {
+  color: var(--path-blue-dark);
+  font-size: 1.3rem;
+}
+
+.recommendationSavings {
+  font-weight: 700;
+  color: #15803d;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.table tbody tr.bestRow td {
+  background: #f0fdf4;
+  font-weight: 600;
+}
+
+.bestBadge {
+  display: inline-block;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 0.5rem;
   color: var(--surface-text);
 }
 
@@ -348,12 +443,17 @@
   border-bottom: 2px solid var(--path-blue);
   padding: 0.5rem;
   color: var(--path-blue-dark);
+  white-space: nowrap;
 }
 
 .table td {
   text-align: left;
   border-bottom: 1px solid var(--surface-border);
   padding: 0.5rem;
+}
+
+.table tbody tr:nth-child(even) td {
+  background: #fafbfe;
 }
 
 .table tr:hover td {

@@ -365,35 +365,39 @@ export default function Home() {
 
       {data ? (
         <>
+          <h2 className={styles.sectionTitle}>Overview</h2>
           <section className={styles.summaryGrid}>
-            <div className={styles.card}>
-              <h3>Total rides</h3>
-              <p>{data.summary.total_rides}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Total rides</span>
+              <span className={styles.statValue}>{data.summary.total_rides}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Stored Value spend</h3>
-              <p>${data.summary.total_spent.toFixed(2)}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Stored Value spend</span>
+              <span className={styles.statValue}>${data.summary.total_spent.toFixed(2)}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Stored Value avg fare</h3>
-              <p>${data.summary.average_stored_value_fare.toFixed(2)}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Stored Value avg fare</span>
+              <span className={styles.statValue}>
+                ${data.summary.average_stored_value_fare.toFixed(2)}
+              </span>
             </div>
-            <div className={styles.card}>
-              <h3>Stored Value rides</h3>
-              <p>{data.summary.stored_value_ride_count}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Stored Value rides</span>
+              <span className={styles.statValue}>{data.summary.stored_value_ride_count}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Pass-based rides</h3>
-              <p>{data.summary.pass_ride_count}</p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Pass-based rides</span>
+              <span className={styles.statValue}>{data.summary.pass_ride_count}</span>
             </div>
-            <div className={styles.card}>
-              <h3>Date range</h3>
-              <p>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Date range</span>
+              <span className={styles.statValueSmall}>
                 {data.summary.date_range.start} to {data.summary.date_range.end}
-              </p>
+              </span>
             </div>
           </section>
 
+          <h2 className={styles.sectionTitle}>Usage trends</h2>
           <section className={styles.chartGrid}>
             <div className={styles.card}>
               <h3>Rides per month</h3>
@@ -452,72 +456,77 @@ export default function Home() {
             </div>
           </section>
 
+          <h2 className={styles.sectionTitle}>Product & plan details</h2>
           <section className={styles.card}>
             <h3>Product type breakdown</h3>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Product Type</th>
-                  <th>Rides</th>
-                  <th>Stored Value Spend</th>
-                  <th>Effective Cost / Ride</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.product_type_breakdown.map((product) => (
-                  <tr key={product.product_type}>
-                    <td>{product.product_type}</td>
-                    <td>{product.rides}</td>
-                    <td>${product.total_spend.toFixed(2)}</td>
-                    <td>{formatCurrency(product.effective_cost_per_ride)}</td>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Product Type</th>
+                    <th>Rides</th>
+                    <th>Stored Value Spend</th>
+                    <th>Effective Cost / Ride</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.product_type_breakdown.map((product) => (
+                    <tr key={product.product_type}>
+                      <td>{product.product_type}</td>
+                      <td>{product.rides}</td>
+                      <td>${product.total_spend.toFixed(2)}</td>
+                      <td>{formatCurrency(product.effective_cost_per_ride)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
 
-          <section className={styles.card}>
-            <h3>Recommendation</h3>
-            <p>
-              <strong>Best plan:</strong> {formatPlanName(data.recommendation.overall.best_option)}
-            </p>
+          <section className={styles.recommendationCard}>
+            <span className={styles.recommendationBadge}>Best value</span>
+            <h3>{formatPlanName(data.recommendation.overall.best_option)}</h3>
             <p>{data.recommendation.overall.reasoning}</p>
-            <p>
-              Estimated savings vs next best: ${data.recommendation.overall.savings_vs_next_best.toFixed(2)}
+            <p className={styles.recommendationSavings}>
+              Estimated savings vs next best: $
+              {data.recommendation.overall.savings_vs_next_best.toFixed(2)}
             </p>
 
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Plan</th>
-                  <th>Estimated total cost</th>
-                  <th>Best choice</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recommendationRows.map((row) => (
-                  <tr key={row.plan}>
-                    <td>{row.planLabel}</td>
-                    <td>${row.cost.toFixed(2)}</td>
-                    <td>{row.isBest ? "Yes" : ""}</td>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Plan</th>
+                    <th>Estimated total cost</th>
+                    <th>Best choice</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {recommendationRows.map((row) => (
+                    <tr key={row.plan} className={row.isBest ? styles.bestRow : undefined}>
+                      <td>{row.planLabel}</td>
+                      <td>${row.cost.toFixed(2)}</td>
+                      <td>{row.isBest ? <span className={styles.bestBadge}>✓ Best</span> : ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section className={styles.card}>
             <h3>Trip history</h3>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Reference</th>
-                  <th>Transit Account #</th>
-                  <th>Trip Time</th>
-                  <th>Mode</th>
-                  <th>Location</th>
-                  <th>Product Type</th>
-                  <th>Fare Amount</th>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Transit Account #</th>
+                    <th>Trip Time</th>
+                    <th>Mode</th>
+                    <th>Location</th>
+                    <th>Product Type</th>
+                    <th>Fare Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -534,6 +543,7 @@ export default function Home() {
                 ))}
               </tbody>
             </table>
+            </div>
           </section>
         </>
       ) : null}
